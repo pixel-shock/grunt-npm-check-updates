@@ -1,3 +1,13 @@
+[![GitHub version](https://badge.fury.io/gh/pixel-shock%2Fgrunt-npm-check-updates.svg)](https://badge.fury.io/gh/pixel-shock%2Fgrunt-npm-check-updates)
+[![npm version](https://badge.fury.io/js/grunt-npm-check-updates.svg)](https://badge.fury.io/js/grunt-npm-check-updates)
+[![Build Status](https://travis-ci.org/pixel-shock/grunt-npm-check-updates.svg?branch=master)](https://travis-ci.org/pixel-shock/grunt-npm-check-updates)
+[![Dependencies](https://david-dm.org/pixel-shock/grunt-npm-check-updates.svg)](https://github.com/pixel-shock/grunt-npm-check-updates)
+[![GitHub issues](https://img.shields.io/github/issues/pixel-shock/grunt-npm-check-updates.svg)](https://github.com/pixel-shock/grunt-npm-check-updates/issues)
+[![GitHub stars](https://img.shields.io/github/stars/pixel-shock/grunt-npm-check-updates.svg)](https://github.com/pixel-shock/grunt-npm-check-updates/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/pixel-shock/grunt-npm-check-updates.svg)](https://github.com/pixel-shock/grunt-npm-check-updates/network)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/pixel-shock/grunt-npm-check-updates/master/LICENSE-MIT)
+[![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com/)
+
 # grunt-npm-check-updates
 
 > A Grunt Task that checks the update capabilities for each installed modules (without their dependencies).
@@ -185,16 +195,20 @@ Just wrap the options into an object with the name of the npm module as key.
 
 ```
 modules: {
-	grunt: {
-		missedMajors: {
-			...
-		}
-	}
+    grunt: {
+        missedMajors: {
+            ...
+        }
+    }
 }
 ```
 
 
 ## Release History
+
+### 0.1.2
+* refactored code
+* added tests
 
 ### 0.1.1
 * changed options to be more distinct
@@ -205,5 +219,4 @@ modules: {
 
 ## TODO
 
-* **write tests**
-* refactor
+* add more tests (if necessary)

@@ -3,12 +3,12 @@
 const _ = require('lodash');
 const fs = require('fs');
 const chalk = require('chalk');
-const semver = require('semver');
 const merge = require('deepmerge');
-const exec = require('child_process').execSync;
 const columnify = require('columnify');
-const ProgressBar = require('progress');
 const XMLWriter = require('xml-writer');
+
+const Comparator = require('./Comparator.js');
+const Helper = require('./Helper.js');
 
 module.exports = (grunt) => {
     /* eslint-disable */
@@ -49,192 +49,12 @@ module.exports = (grunt) => {
 
         const options = merge(defaults, this.options());
 
-        const compareVersion = (moduleName, installedVersion, latestVersion, versions) => {
-            try {
-                const installedVersionIndex = _.indexOf(versions, installedVersion);
-                const latestVersionIndex = _.indexOf(versions, latestVersion);
-                let missedMajors = 0;
-                let missedMinors = 0;
-                let missedPatches = 0;
-                let lastMajor = -1;
-                let lastMinor = -1;
-
-                if (installedVersionIndex !== -1 && latestVersionIndex !== -1) {
-                    for (let i = installedVersionIndex; i <= latestVersionIndex; i += 1) {
-                        const validAvailable = semver.valid(versions[i]);
-                        const validInstalled = semver.valid(installedVersion);
-                        const isStableRelease = /^[0-9.]+$/.test(validInstalled);
-
-                        if (validInstalled !== null && validAvailable !== null && isStableRelease) {
-                            const majorInstalled = semver.major(validInstalled);
-                            const minorInstalled = semver.minor(validInstalled);
-                            const patchInstalled = semver.patch(validInstalled);
-                            const majorAvailable = semver.major(validAvailable);
-                            const minorAvailable = semver.minor(validAvailable);
-                            const patchAvailable = semver.patch(validAvailable);
-
-                            if (majorInstalled === majorAvailable
-                                && minorInstalled === minorAvailable
-                                && patchInstalled !== patchAvailable) {
-                                missedPatches += 1;
-                            }
-
-                            if (majorInstalled === majorAvailable
-                                && minorInstalled !== minorAvailable
-                                && lastMinor !== minorAvailable) {
-                                missedMinors += 1;
-                                lastMinor = minorAvailable;
-                            }
-
-                            if (majorInstalled < majorAvailable
-                                && lastMajor !== majorAvailable) {
-                                missedMajors += 1;
-                                lastMajor = majorAvailable;
-                            }
-                        }
-                    }
-
-                    return {
-                        moduleName,
-                        installedVersion,
-                        latestVersion,
-                        missedMajors,
-                        missedMinors,
-                        missedPatches,
-                        versions,
-                    };
-                }
-                grunt.fail.fatal(`Could not find current installed version within npm version history for module ${moduleName}`);
-            } catch (e) {
-                grunt.fail.fatal(e);
-            }
-
-            return {};
-        };
-
-        const prettifyVersions = (versions, installedVersion) => {
-            let ret = '';
-            _.each(versions, (version, key) => {
-                let v = version;
-                if (v === installedVersion || key === versions.length - 1) {
-                    v = chalk.underline(v);
-                }
-                if (key < versions.length - 2) {
-                    ret += `\u251C ${v}\n`;
-                } else {
-                    ret += `\u2514 ${v}\n`;
-                }
-            });
-
-            return ret;
-        };
-
-        const getModules = () => {
-            const pgkJsonFile = options.include.jsonFile;
-
-            if (grunt.file.isFile(pgkJsonFile)) {
-                try {
-                    const fileContent = fs.readFileSync(pgkJsonFile, 'utf8');
-                    try {
-                        return JSON.parse(fileContent);
-                    } catch (err) {
-                        grunt.fail.fatal(err);
-                    }
-                } catch (err) {
-                    grunt.fail.fatal(err);
-                }
-            } else {
-                grunt.log.writeln(chalk.red('Could not read package.json. File don\'t exist!'));
-            }
-
-            return {};
-        };
-
-        const getInstalledVersion = (moduleName) => {
-            // NOTE: As npm view do not return a valid JSON we can't use this with JSON parse to
-            // get the whole module information due to a JSON.parse error
-            const regExInstalledVersion = new RegExp(`${moduleName}\\@(\\d+\\.\\d+\\.\\d+)`, 'igm');
-            const cmdInstalledVersion = `npm list --depth=0 ${moduleName}`;
-            let cmdInstalledVersionResult = '';
-            let matchesInstalledVersion = null;
-
-            try {
-                cmdInstalledVersionResult = exec(cmdInstalledVersion, { encoding: 'UTF-8' }).replace(/\r?\n?/g, '');
-                matchesInstalledVersion = regExInstalledVersion.exec(cmdInstalledVersionResult);
-            } catch (err) {
-                grunt.log.warn(err);
-            }
-
-            let cmdModuleVerionsResult = '';
-            let versions = [];
-
-            try {
-                cmdModuleVerionsResult = exec(`npm view ${moduleName} versions`, { encoding: 'UTF-8' });
-                versions = cmdModuleVerionsResult.replace(/(?:\r\n|\r|\n|\s?)/g, '').replace(/\[?\]?/ig, '').replace(/'/g, '').split(',');
-            } catch (err) {
-                grunt.log.warn(err);
-            }
-
-            let cmdDistTagsResult = '';
-            const regExLatest = new RegExp('(latest:\\s?\'|")(\\d+\\.\\d+\\.\\d+)(\'|")', 'ig');
-            let matchesLatest = null;
-
-            try {
-                cmdDistTagsResult = exec(`npm view ${moduleName} dist-tags`, { encoding: 'UTF-8' });
-                const distTags = cmdDistTagsResult.replace(/\r?\n?/g, '');
-                matchesLatest = regExLatest.exec(distTags);
-            } catch (err) {
-                grunt.log.warn(err);
-            }
-
-            if (matchesInstalledVersion !== null
-                && matchesInstalledVersion.length === 2
-                && matchesLatest !== null
-                && matchesLatest.length === 4) {
-                return {
-                    moduleName,
-                    installed: matchesInstalledVersion[1],
-                    latest: matchesLatest[2],
-                    versions,
-                };
-            }
-
-            return false;
-        };
-
-        const getModuleDatas = () => {
-            const modules = getModules();
-            const result = [];
-            const prodModules = (options.include.production && modules.dependencies) || {};
-            const devModules = (options.include.develop && modules.devDependencies) || {};
-            const optModules = (options.include.optional && modules.optionalDependencies) || {};
-            let modulesToTest = merge({}, prodModules);
-            modulesToTest = merge(modulesToTest, devModules);
-            modulesToTest = merge(modulesToTest, optModules);
-
-            const progressBar = new ProgressBar('Checking update states for module :current/:total [:bar] :percent :elapseds :etas', {
-                total: _.size(modulesToTest),
-                width: 80,
-            });
-
-
-            _.each(modulesToTest, (version, name) => {
-                const data = getInstalledVersion(name);
-
-                if (data !== false) {
-                    result.push(data);
-                }
-
-                progressBar.tick();
-            });
-
-            return result;
-        };
-
         const init = () => {
-            const modules = getModuleDatas();
-            const columns = [];
             const xmlWriter = new XMLWriter();
+            const comparator = new Comparator();
+            const helper = new Helper();
+            const modules = helper.getModuleDatas(options);
+            const columns = [];
             let overAllStatusErrors = 0;
 
             xmlWriter.startDocument();
@@ -249,7 +69,7 @@ module.exports = (grunt) => {
                     installed: data.installed,
                     latest: data.latest,
                 };
-                const result = compareVersion(
+                const result = comparator.compare(
                     data.moduleName,
                     data.installed,
                     data.latest,
@@ -331,7 +151,7 @@ module.exports = (grunt) => {
                 }
 
                 if (moduleOptions.showVersions === true) {
-                    columnData.versions = prettifyVersions(
+                    columnData.versions = helper.prettifyVersions(
                         result.versions,
                         result.installedVersion);
 
