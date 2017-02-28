@@ -20,94 +20,80 @@ grunt.loadNpmTasks('grunt-npm-check-updates');
 ## The "grunt-npm-check-updates" task
 
 ### Overview
-In your project's Gruntfile, add a section named `npm_check_updates` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `grunt-npm-check-updates` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
-  npm_check_updates: {
-    options: {
-      packageJson: 'package.json',
-      production: true,
-      develop: true,
-      optional: true,
-      visualOutput: true,
-      xmlOutput: true,
-      xmlOutputFilename: 'npm-check-updates.xml'
+  'grunt-npm-check-updates': {
+    include: {
+        production: true,
+        develop: true,
+        optional: false,
+        jsonFile: 'package.json',
+    },
+    output: {
+        visual: true,
+        xml: true,
+        xmlFilename: 'grunt-npm-check-updates.xml',
     },
     global: {
-      missedMajors: {
-        allowed: 1,
-        level: 'error'
-      },
-      missedMinors: {
-        allowed: 1,
-        level: 'warn'
-      },
-      missedPatches: {
-        allowed: 0,
-        level: 'warn'
-      },
-      showVersions: false
-    },
-    modules: {
-      'grunt': {
         missedMajors: {
-          allowed: 0,
-          level: 'error'
+            allowed: 0,
+            level: 'error',
         },
         missedMinors: {
-          allowed: 1,
-          level: 'error'
+            allowed: 1,
+            level: 'warn',
         },
         missedPatches: {
-          allowed: 1,
-          level: 'warn'
-        }
-      }
-    }
-  },
+            allowed: 0,
+            level: 'warn',
+        },
+        showVersions: false,
+    },
+    modules: {}
 });
 ```
 
 ### Task Options
 
-#### options.packageJson
+#### include.jsonFile
 Type: `String`<br>
 Default value: `package.json`<br>
 
 The path of the package.json.
 
-#### options.production
+#### include.production
 Type: `Boolean`<br>
 Default value: `true`<br>
 
 Indicates whether the `dependencies` should be included in the test.
 
-#### options.development
+#### include.development
 Type: `Boolean`<br>
 Default value: `true`<br>
 
 Indicates whether the `devDependencies` should be included in the test.
 
-#### options.optionalDependencies
+#### include.optional
 Type: `Boolean`<br>
 Default value: `true`<br>
 
 Indicates whether the `optionalDependencies` should be included in the test.
 
-#### options.visualOutput
+#### output.visual
 Type: `Boolean`<br>
 Default value: `true`<br>
 
 Indicates whether the result of the tests should be printed to the console.
 
-#### options.xmlOutput
+#### output.xml
 Type: `Boolean`<br>
 Default value: `true`<br>
 
 Indicates whether the result of the tests should be written to a xml file.
 
-#### options.xmlOutputFilename
+#### output.xmlFilename
 Type: `String`<br>
 Default value: `npm-check-updates.xml`<br>
 
@@ -193,8 +179,22 @@ Indicates the whether the XML output or the console output should display the ve
 See the **Global Test Options**.<br>
 Just wrap the options into an object with the name of the npm module as key.
 
+```
+modules: {
+	grunt: {
+		missedMajors: {
+			...
+		}
+	}
+}
+```
+
 
 ## Release History
+
+### 0.1.1
+* changed options to be more distinct
+* fixed ``--debug`` flag identification for task
 
 ### 0.1.0
 * first release
