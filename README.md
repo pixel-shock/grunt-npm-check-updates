@@ -206,6 +206,9 @@ modules: {
 
 ## Release History
 
+### 0.1.3
+* upgraded required node version
+
 ### 0.1.2
 * refactored code
 * added tests
