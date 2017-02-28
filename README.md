@@ -19,6 +19,10 @@ grunt.loadNpmTasks('grunt-npm-check-updates');
 
 ## The "grunt-npm-check-updates" task
 
+### Example output
+
+![./screenshot.jpeg](./screenshot.jpeg)
+
 ### Overview
 In your project's Gruntfile, add a section named `grunt-npm-check-updates` to the data object passed into `grunt.initConfig()`.
 
