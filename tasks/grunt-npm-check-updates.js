@@ -15,16 +15,19 @@ module.exports = (grunt) => {
     grunt.registerTask('grunt-npm-check-updates', 'A Grunt Task that checks the update capabilities for each installed modules (without their dependencies).', function() {
     /* eslint-enable */
         const done = this.async();
+        const isDebug = grunt.cli.options.debug === 1 || false;
 
         const defaults = {
-            options: {
-                packageJson: 'package.json',
+            include: {
                 production: true,
                 develop: true,
-                optional: true,
-                visualOutput: true,
-                xmlOutput: true,
-                xmlOutputFilename: 'npm-check-updates.xml',
+                optional: false,
+                jsonFile: 'package.json',
+            },
+            output: {
+                visual: true,
+                xml: true,
+                xmlFilename: 'grunt-npm-check-updates.xml',
             },
             global: {
                 missedMajors: {
@@ -127,7 +130,7 @@ module.exports = (grunt) => {
         };
 
         const getModules = () => {
-            const pgkJsonFile = options.options.packageJson;
+            const pgkJsonFile = options.include.jsonFile;
 
             if (grunt.file.isFile(pgkJsonFile)) {
                 try {
@@ -202,9 +205,9 @@ module.exports = (grunt) => {
         const getModuleDatas = () => {
             const modules = getModules();
             const result = [];
-            const prodModules = (options.options.production && modules.dependencies) || {};
-            const devModules = (options.options.develop && modules.devDependencies) || {};
-            const optModules = (options.options.optional && modules.optionalDependencies) || {};
+            const prodModules = (options.include.production && modules.dependencies) || {};
+            const devModules = (options.include.develop && modules.devDependencies) || {};
+            const optModules = (options.include.optional && modules.optionalDependencies) || {};
             let modulesToTest = merge({}, prodModules);
             modulesToTest = merge(modulesToTest, devModules);
             modulesToTest = merge(modulesToTest, optModules);
@@ -272,7 +275,11 @@ module.exports = (grunt) => {
                         majorErrorCount += 1;
                         break;
                     default:
-                        columnData.major = `[DEBUG] Missed ${result.missedMajors}`;
+                        if (isDebug) {
+                            columnData.major = `[DEBUG] Missed ${result.missedMajors}`;
+                        } else {
+                            columnData.major = chalk.green('\u2714');
+                        }
                         break;
                     }
                 } else {
@@ -290,7 +297,11 @@ module.exports = (grunt) => {
                         minorErrorCount += 1;
                         break;
                     default:
-                        columnData.minor = `[DEBUG] Missed ${result.missedMinors}`;
+                        if (isDebug) {
+                            columnData.minor = `[DEBUG] Missed ${result.missedMinors}`;
+                        } else {
+                            columnData.minor = chalk.green('\u2714');
+                        }
                         break;
                     }
                 } else {
@@ -308,7 +319,11 @@ module.exports = (grunt) => {
                         patchErrorCount += 1;
                         break;
                     default:
-                        columnData.patch = `[DEBUG] Missed ${result.missedPatches}`;
+                        if (isDebug) {
+                            columnData.patch = `[DEBUG] Missed ${result.missedPatches}`;
+                        } else {
+                            columnData.patch = chalk.green('\u2714');
+                        }
                         break;
                     }
                 } else {
@@ -342,7 +357,7 @@ module.exports = (grunt) => {
             });
 
 
-            if (options.options.visualOutput === true || overAllStatusErrors > 0) {
+            if (options.output.visual === true || overAllStatusErrors > 0) {
                 grunt.log.writeln('');
 
                 grunt.log.writeln(columnify(columns, {
@@ -361,9 +376,9 @@ module.exports = (grunt) => {
             xmlWriter.endElement();
             xmlWriter.endDocument();
 
-            if (options.options.xmlOutput === true) {
+            if (options.output.xml === true) {
                 try {
-                    fs.writeFileSync(options.options.xmlOutputFilename, xmlWriter.toString());
+                    fs.writeFileSync(options.output.xmlFilename, xmlWriter.toString());
                 } catch (err) {
                     grunt.log.writeln(`Could not write XML output to file: ${chalk.yellow(err)}`);
                 }
@@ -371,8 +386,6 @@ module.exports = (grunt) => {
 
             if (overAllStatusErrors > 0) {
                 grunt.fail.fatal(`Grunt Task failed, because of ${overAllStatusErrors} error(s)!`);
-            } else {
-                grunt.log.writeln(chalk.green('DONE without errors!'));
             }
 
             done();
