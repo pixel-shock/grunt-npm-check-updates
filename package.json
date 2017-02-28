@@ -1,7 +1,7 @@
 {
   "name": "grunt-npm-check-updates",
   "description": "A Grunt Task that checks the update capabilities for each installed modules (without their dependencies).",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/pixel-shock/grunt-npm-check-updates",
   "author": {
     "name": "Wehe, Tino",
@@ -31,6 +31,7 @@
     "eslint-config-google": "^0.7.1",
     "eslint-plugin-import": "^2.2.0",
     "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-nodeunit": "^1.0.0",
     "grunt-eslint": "^19.0.0"
   },
   "dependencies": {

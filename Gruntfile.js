@@ -12,12 +12,18 @@ module.exports = (grunt) => {
                 './tasks/**/*.js',
             ],
         },
+        nodeunit: {
+            tests: [
+                'test/*_test.js',
+            ],
+        },
     });
 
     // Actually load this plugin's task(s).
     grunt.loadTasks('tasks');
     grunt.loadNpmTasks('grunt-eslint');
+    grunt.loadNpmTasks('grunt-contrib-nodeunit');
 
-    grunt.registerTask('test', ['eslint']);
+    grunt.registerTask('test', ['eslint', 'nodeunit']);
     grunt.registerTask('default', ['grunt-npm-check-updates']);
 };
