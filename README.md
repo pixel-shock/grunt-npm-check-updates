@@ -206,6 +206,11 @@ modules: {
 
 ## Release History
 
+### 1.0.0
+* moved Helper.js & Comparator.js into "lib" dir
+* removed Progressbar
+* changed graphical output
+
 ### 0.1.3
 * upgraded required node version
 
