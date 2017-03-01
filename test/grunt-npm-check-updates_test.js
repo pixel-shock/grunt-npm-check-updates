@@ -1,6 +1,6 @@
 'use strict';
 
-const Comparator = require('../tasks/Comparator.js');
+const Comparator = require('../tasks/lib/Comparator.js');
 
 /*
   ======== A Handy Little Nodeunit Reference ========
@@ -118,6 +118,38 @@ exports.tests = {
         test.equal(result.latestVersion, '2.8.6');
         test.equal(result.missedMajors, 1);
         test.equal(result.missedMinors, 7);
+        test.equal(result.missedPatches, 0);
+        test.equal(result.versions, DUMMY_VERSIONS);
+
+        test.done();
+    },
+    missingCurrentVerionInHistory: (test) => {
+        const DUMMY_VERSIONS = [
+            '1.0.0',
+            '1.1.0',
+            '1.2.0',
+            '1.3.0',
+            '1.4.0',
+            '1.5.0',
+            '1.6.0',
+            '1.7.0',
+            '1.7.1',
+            '1.7.2',
+            '2.8.0',
+            '2.8.1',
+            '2.8.2',
+            '2.8.3',
+            '2.8.4',
+            '2.8.5',
+            '2.8.6',
+        ];
+        const result = Comparator().compare('dummyModule', '1.8.0', '2.8.6', DUMMY_VERSIONS);
+
+        test.equal(result.moduleName, 'dummyModule');
+        test.equal(result.installedVersion, '1.8.0');
+        test.equal(result.latestVersion, '2.8.6');
+        test.equal(result.missedMajors, 0);
+        test.equal(result.missedMinors, 0);
         test.equal(result.missedPatches, 0);
         test.equal(result.versions, DUMMY_VERSIONS);
 

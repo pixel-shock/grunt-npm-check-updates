@@ -7,8 +7,8 @@ const merge = require('deepmerge');
 const columnify = require('columnify');
 const XMLWriter = require('xml-writer');
 
-const Comparator = require('./Comparator.js');
-const Helper = require('./Helper.js');
+const Comparator = require('./lib/Comparator.js');
+const Helper = require('./lib/Helper.js');
 
 module.exports = (grunt) => {
     /* eslint-disable */
@@ -178,6 +178,7 @@ module.exports = (grunt) => {
 
 
             if (options.output.visual === true || overAllStatusErrors > 0) {
+                grunt.log.writeln('');
                 grunt.log.writeln('');
 
                 grunt.log.writeln(columnify(columns, {
