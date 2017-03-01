@@ -6,7 +6,6 @@ const chalk = require('chalk');
 const merge = require('deepmerge');
 const grunt = require('grunt');
 const exec = require('child_process').execSync;
-const ProgressBar = require('progress');
 
 function Helper() {
     if (!(this instanceof Helper)) {
@@ -112,19 +111,25 @@ Helper.prototype = {
         modulesToTest = merge(modulesToTest, devModules);
         modulesToTest = merge(modulesToTest, optModules);
 
-        const progressBar = new ProgressBar('Checking update states for module :current/:total [:bar] :percent :elapseds :etas', {
-            total: _.size(modulesToTest),
-            width: 80,
-        });
+        grunt.log.writeln('');
+        grunt.log.writeln(chalk.underline(chalk.bold('Analyzing:')));
+        grunt.log.writeln('');
 
-        _.each(modulesToTest, (version, name) => {
-            const data = Helper().getInstalledVersion(name);
+        _.each(modulesToTest, (version, moduleName) => {
+            grunt.log.write(moduleName);
+            grunt.log.write(' ');
+            const data = Helper().getInstalledVersion(moduleName);
 
             if (data !== false) {
                 result.push(data);
+                /* eslint-disable */
+                grunt.log.write(chalk.green('\u2714') + '  ');
+                /* eslint-enable */
+            } else {
+                /* eslint-disable */
+                grunt.log.write(chalk.red('\u2718')) + '  ';
+                /* eslint-enable */
             }
-
-            progressBar.tick();
         });
 
         return result;
