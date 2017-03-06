@@ -51,7 +51,7 @@ grunt.initConfig({
         xmlFilename: 'grunt-npm-check-updates.xml',
         xmlTemplate: '<?xml version="1.0"?><modules>{{#each modules}}<module name="{{{ this.name }}}" installed="{{{ this.installed }}}" latest="{{{ this.latest }}}" missedMajors="{{{ this.missedMajors }}}" missedMinors="{{{ this.missedMinors }}}" missedPatches="{{{ this.missedPatches }}}" status="{{{ this.status }}}"><versions>{{{ this.versions }}}</versions></module>{{/each}}</modules>',
         json: true,
-        jsonFileName: 'grunt-npm-check-updates.json',
+        jsonFilename: 'grunt-npm-check-updates.json',
         jsonTemplate: '{"modules": [{{#each modules}}{{#if @last }}{"name": "{{{ this.name }}}","installed": "{{{ this.installed }}}","latest": "{{{ this.latest }}}","missedMajors": "{{{ this.missedMajors }}}","missedMinors": "{{{ this.missedMinors }}}","missedPatches": "{{{ this.missedPatches }}}","versions": "{{{ this.versions }}}","status": "{{{ this.status }}}"}{{else}}{"name": "{{{ this.name }}}","installed": "{{{ this.installed }}}","latest": "{{{ this.latest }}}","missedMajors": "{{{ this.missedMajors }}}","missedMinors": "{{{ this.missedMinors }}}","missedPatches": "{{{ this.missedPatches }}}","versions": "{{{ this.versions }}}","status": "{{{ this.status }}}"},{{/if}}{{/each}}]}',
     },
     global: {
@@ -233,6 +233,9 @@ modules: {
 
 
 ## Release History
+
+### 1.1.1
+* fixed typo for "jsonFileName" to "jsonFilename"
 
 ### 1.1.0
 * removed XMLWriter package
