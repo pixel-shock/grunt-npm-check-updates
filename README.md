@@ -234,6 +234,9 @@ modules: {
 
 ## Release History
 
+### 1.1.1
+* fixed typo for "jsonFileName" to "jsonFilename"
+
 ### 1.1.0
 * removed XMLWriter package
 * added Handelbars package
