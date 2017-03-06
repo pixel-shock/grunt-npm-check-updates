@@ -1,7 +1,7 @@
 {
   "name": "grunt-npm-check-updates",
   "description": "A Grunt Task that checks the update capabilities for each installed modules (without their dependencies).",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "homepage": "https://github.com/pixel-shock/grunt-npm-check-updates",
   "author": {
     "name": "Wehe, Tino",
