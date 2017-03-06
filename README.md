@@ -49,6 +49,10 @@ grunt.initConfig({
         visual: true,
         xml: true,
         xmlFilename: 'grunt-npm-check-updates.xml',
+        xmlTemplate: '<?xml version="1.0"?><modules>{{#each modules}}<module name="{{{ this.name }}}" installed="{{{ this.installed }}}" latest="{{{ this.latest }}}" missedMajors="{{{ this.missedMajors }}}" missedMinors="{{{ this.missedMinors }}}" missedPatches="{{{ this.missedPatches }}}" status="{{{ this.status }}}"><versions>{{{ this.versions }}}</versions></module>{{/each}}</modules>',
+        json: true,
+        jsonFileName: 'grunt-npm-check-updates.json',
+        jsonTemplate: '{"modules": [{{#each modules}}{{#if @last }}{"name": "{{{ this.name }}}","installed": "{{{ this.installed }}}","latest": "{{{ this.latest }}}","missedMajors": "{{{ this.missedMajors }}}","missedMinors": "{{{ this.missedMinors }}}","missedPatches": "{{{ this.missedPatches }}}","versions": "{{{ this.versions }}}","status": "{{{ this.status }}}"}{{else}}{"name": "{{{ this.name }}}","installed": "{{{ this.installed }}}","latest": "{{{ this.latest }}}","missedMajors": "{{{ this.missedMajors }}}","missedMinors": "{{{ this.missedMinors }}}","missedPatches": "{{{ this.missedPatches }}}","versions": "{{{ this.versions }}}","status": "{{{ this.status }}}"},{{/if}}{{/each}}]}',
     },
     global: {
         missedMajors: {
@@ -111,7 +115,31 @@ Indicates whether the result of the tests should be written to a xml file.
 Type: `String`<br>
 Default value: `npm-check-updates.xml`<br>
 
-The filename for the `options.xmlOutput` option.
+The filename for the `options.xml` option.
+
+#### output.xmlTemplate
+Type: `String`<br>
+Default value: `<?xml version="1.0"?><modules>{{#each modules}}<module name="{{{ this.name }}}" installed="{{{ this.installed }}}" latest="{{{ this.latest }}}" missedMajors="{{{ this.missedMajors }}}" missedMinors="{{{ this.missedMinors }}}" missedPatches="{{{ this.missedPatches }}}" status="{{{ this.status }}}"><versions>{{{ this.versions }}}</versions></module>{{/each}}</modules>`
+
+The Handlebars template for the XML file output.
+
+#### output.json
+Type: `Boolean`<br>
+Default value: `true`<br>
+
+Indicates whether the result of the tests should be written to a json file.
+
+#### output.jsonFilename
+Type: `String`<br>
+Default value: `npm-check-updates.json`<br>
+
+The filename for the `options.json` option.
+
+#### output.jsonTemplate
+Type: `String`<br>
+Default value: `{"modules": [{{#each modules}}{{#if @last }}{"name": "{{{ this.name }}}","installed": "{{{ this.installed }}}","latest": "{{{ this.latest }}}","missedMajors": "{{{ this.missedMajors }}}","missedMinors": "{{{ this.missedMinors }}}","missedPatches": "{{{ this.missedPatches }}}","versions": "{{{ this.versions }}}","status": "{{{ this.status }}}"}{{else}}{"name": "{{{ this.name }}}","installed": "{{{ this.installed }}}","latest": "{{{ this.latest }}}","missedMajors": "{{{ this.missedMajors }}}","missedMinors": "{{{ this.missedMinors }}}","missedPatches": "{{{ this.missedPatches }}}","versions": "{{{ this.versions }}}","status": "{{{ this.status }}}"},{{/if}}{{/each}}]}`
+
+The Handlebars template for the JSON file output.
 
 ### Global Test Options
 
@@ -205,6 +233,12 @@ modules: {
 
 
 ## Release History
+
+### 1.1.0
+* removed XMLWriter package
+* added Handelbars package
+* add XML Handlebars Template option
+* add JSON Handlebars Template option
 
 ### 1.0.0
 * moved Helper.js & Comparator.js into "lib" dir

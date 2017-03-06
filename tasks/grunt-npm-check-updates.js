@@ -5,10 +5,10 @@ const fs = require('fs');
 const chalk = require('chalk');
 const merge = require('deepmerge');
 const columnify = require('columnify');
-const XMLWriter = require('xml-writer');
 
 const Comparator = require('./lib/Comparator.js');
 const Helper = require('./lib/Helper.js');
+const Handlebars = require('handlebars');
 
 module.exports = (grunt) => {
     /* eslint-disable */
@@ -28,6 +28,10 @@ module.exports = (grunt) => {
                 visual: true,
                 xml: true,
                 xmlFilename: 'grunt-npm-check-updates.xml',
+                xmlTemplate: '<?xml version="1.0"?><modules>{{#each modules}}<module name="{{{ this.name }}}" installed="{{{ this.installed }}}" latest="{{{ this.latest }}}" missedMajors="{{{ this.missedMajors }}}" missedMinors="{{{ this.missedMinors }}}" missedPatches="{{{ this.missedPatches }}}" status="{{{ this.status }}}"><versions>{{{ this.versions }}}</versions></module>{{/each}}</modules>',
+                json: true,
+                jsonFileName: 'grunt-npm-check-updates.json',
+                jsonTemplate: '{"modules": [{{#each modules}}{{#if @last }}{"name": "{{{ this.name }}}","installed": "{{{ this.installed }}}","latest": "{{{ this.latest }}}","missedMajors": "{{{ this.missedMajors }}}","missedMinors": "{{{ this.missedMinors }}}","missedPatches": "{{{ this.missedPatches }}}","versions": "{{{ this.versions }}}","status": "{{{ this.status }}}"}{{else}}{"name": "{{{ this.name }}}","installed": "{{{ this.installed }}}","latest": "{{{ this.latest }}}","missedMajors": "{{{ this.missedMajors }}}","missedMinors": "{{{ this.missedMinors }}}","missedPatches": "{{{ this.missedPatches }}}","versions": "{{{ this.versions }}}","status": "{{{ this.status }}}"},{{/if}}{{/each}}]}',
             },
             global: {
                 missedMajors: {
@@ -50,15 +54,12 @@ module.exports = (grunt) => {
         const options = merge(defaults, this.options());
 
         const init = () => {
-            const xmlWriter = new XMLWriter();
             const comparator = new Comparator();
             const helper = new Helper();
             const modules = helper.getModuleDatas(options);
             const columns = [];
             let overAllStatusErrors = 0;
-
-            xmlWriter.startDocument();
-            xmlWriter.startElement('modules');
+            const outputModules = [];
 
             _.each(modules, (data) => {
                 let majorErrorCount = 0;
@@ -76,13 +77,15 @@ module.exports = (grunt) => {
                     data.versions);
                 const moduleOptions = options.modules[result.moduleName] || options.global;
 
-                xmlWriter.startElement('module');
-                xmlWriter.writeAttribute('name', data.moduleName);
-                xmlWriter.writeAttribute('installed', data.installed);
-                xmlWriter.writeAttribute('latest', data.latest);
-                xmlWriter.writeAttribute('missedMajors', result.missedMajors);
-                xmlWriter.writeAttribute('missedMinors', result.missedMinors);
-                xmlWriter.writeAttribute('missedPatches', result.missedPatches);
+                const outputModule = {
+                    name: result.moduleName,
+                    installed: result.installed,
+                    latest: result.latest,
+                    missedMajors: result.missedMajors,
+                    missedMinors: result.missedMinors,
+                    missedPatches: result.missedPatches,
+                    versions: result.versions,
+                };
 
                 if (moduleOptions.missedMajors.allowed !== true
                     && result.missedMajors > moduleOptions.missedMajors.allowed) {
@@ -154,26 +157,21 @@ module.exports = (grunt) => {
                     columnData.versions = helper.prettifyVersions(
                         result.versions,
                         result.installedVersion);
-
-                    xmlWriter.startElement('versions');
-                    xmlWriter.text(data.versions.join(','));
-                    xmlWriter.endElement();
                 } else {
                     columnData.versions = chalk.italic('n.a.');
                 }
 
                 if (majorErrorCount + minorErrorCount + patchErrorCount === 0) {
                     columnData['overall status'] = chalk.green('\u2714');
-                    xmlWriter.writeAttribute('status', 'success');
+                    outputModule.status = 'success';
                 } else {
                     columnData['overall status'] = chalk.red('\u2718');
-                    xmlWriter.writeAttribute('status', 'fail');
+                    outputModule.status = 'fail';
                     overAllStatusErrors += 1;
                 }
 
                 columns.push(columnData);
-
-                xmlWriter.endElement();
+                outputModules.push(outputModule);
             });
 
 
@@ -194,14 +192,29 @@ module.exports = (grunt) => {
                 grunt.log.writeln('');
             }
 
-            xmlWriter.endElement();
-            xmlWriter.endDocument();
-
             if (options.output.xml === true) {
                 try {
-                    fs.writeFileSync(options.output.xmlFilename, xmlWriter.toString());
+                    const hbTemplate = Handlebars.compile(options.output.xmlTemplate);
+                    const xmlOutput = hbTemplate({
+                        modules: outputModules,
+                    });
+
+                    fs.writeFileSync(options.output.xmlFilename, xmlOutput, 'utf8');
                 } catch (err) {
                     grunt.log.writeln(`Could not write XML output to file: ${chalk.yellow(err)}`);
+                }
+            }
+
+            if (options.output.json === true) {
+                try {
+                    const hbTemplate = Handlebars.compile(options.output.jsonTemplate);
+                    const jsonOutput = hbTemplate({
+                        modules: outputModules,
+                    });
+
+                    fs.writeFileSync(options.output.jsonFileName, jsonOutput, 'utf8');
+                } catch (err) {
+                    grunt.log.writeln(`Could not write JSON output to file: ${chalk.yellow(err)}`);
                 }
             }
 
