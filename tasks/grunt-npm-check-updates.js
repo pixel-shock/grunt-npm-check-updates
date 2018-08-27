@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const fs = require('fs');
 const chalk = require('chalk');
-const merge = require('deepmerge');
+const deepmerge = require('deepmerge');
 const columnify = require('columnify');
 
 const Comparator = require('./lib/Comparator.js');
@@ -17,7 +17,7 @@ module.exports = (grunt) => {
         const done = this.async();
         const isDebug = grunt.cli.options.debug === 1 || false;
 
-        const defaults = {
+        let defaults = {
             include: {
                 production: true,
                 develop: true,
@@ -51,36 +51,36 @@ module.exports = (grunt) => {
             modules: {},
         };
 
-        const options = merge(defaults, this.options());
+        const options = deepmerge.all([{}, defaults, this.options()]);
 
         const init = () => {
             const comparator = new Comparator();
             const helper = new Helper();
             const modules = helper.getModuleDatas(options);
-            const columns = [];
+            let columns = [];
             let overAllStatusErrors = 0;
-            const outputModules = [];
+            let outputModules = [];
 
             _.each(modules, (data) => {
                 let majorErrorCount = 0;
                 let minorErrorCount = 0;
                 let patchErrorCount = 0;
-                const columnData = {
+                let columnData = {
                     name: data.moduleName,
                     installed: data.installed,
                     latest: data.latest,
                 };
-                const result = comparator.compare(
+                let result = comparator.compare(
                     data.moduleName,
                     data.installed,
                     data.latest,
                     data.versions);
-                const moduleOptions = options.modules[result.moduleName] || options.global;
+                let moduleOptions = options.modules[result.moduleName] || options.global;
 
-                const outputModule = {
+                let outputModule = {
                     name: result.moduleName,
                     installed: result.installed,
-                    latest: result.latest,
+                    latest: result.latestVersion,
                     missedMajors: result.missedMajors,
                     missedMinors: result.missedMinors,
                     missedPatches: result.missedPatches,
