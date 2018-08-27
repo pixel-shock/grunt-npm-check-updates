@@ -17,6 +17,13 @@ module.exports = (grunt) => {
                 'test/*_test.js',
             ],
         },
+        'grunt-npm-check-updates': {
+            options: {
+                output: {
+                    json: false
+                }
+            }
+        }
     });
 
     // Actually load this plugin's task(s).

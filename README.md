@@ -234,6 +234,13 @@ modules: {
 
 ## Release History
 
+### 1.1.2
+* fixed issue https://github.com/pixel-shock/grunt-npm-check-updates/issues/2
+** thanks to Matthew Mitchell (https://github.com/mmitchell80)
+* fixed issue https://github.com/pixel-shock/grunt-npm-check-updates/issues/1
+** thanks to Matthew Mitchell (https://github.com/mmitchell80)
+* switched to yarn
+
 ### 1.1.1
 * fixed typo for "jsonFileName" to "jsonFilename"
 
